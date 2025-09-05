@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📊 LawBandit Chart Maker
 
-## Getting Started
+An LLM-powered tool that transforms legal text into structured flowcharts — built in **TypeScript + Node.js** using **Next.js**, **React Flow**, and **OpenAI**.
 
-First, run the development server:
+This project is a submission for the **Fall 2025 LawBandit Software Internship Challenge**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Overview
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Students highlight legal concepts, rules, or case descriptions, and prompt a large language model (LLM) to generate a clean, structured flowchart that visualizes the logic.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Input**: Raw legal text and a user prompt(e.g. from a casebook or rule explanation)
+- **Processing**: LLM extracts nodes and relationships (edges)
+- **Output**: Flowchart rendered using React Flow + auto-layout via Dagre
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Next.js (App Router)** — fullstack framework (TypeScript + Node.js)
+- **React Flow** — dynamic chart rendering
+- **Dagre** — clean, automatic node layout
+- **OpenAI API** — LLM-based structure generation
+- **Tailwind CSS** — styling
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Project Status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This repo currently contains the scaffolded code structure:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/` — app routes and backend API (`/api/generate`)
+- `src/components/` — UI components (input form, chart canvas)
+- `src/lib/` — layout utility using Dagre
+- Basic README, .gitignore, and Tailwind setup
+
+---
+
+## Submission Timeline
+
+- Scaffold: Sep 4, 2025
+- API integration: In Progress
+- UI flowchart: In Progress
+- Deployment to Vercel: Coming soon!
+
+---
+
+## Demo
+
+Demo video coming soon!

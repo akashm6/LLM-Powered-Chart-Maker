@@ -1,0 +1,1 @@
+// Modal to allow the user to input prompts to OpenAI about their highlighted text.
