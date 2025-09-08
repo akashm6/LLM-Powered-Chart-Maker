@@ -20,9 +20,10 @@ Students highlight legal concepts, rules, or case descriptions, and prompt a lar
 
 - **Next.js (App Router)** — fullstack framework (TypeScript + Node.js)
 - **React Flow** — dynamic chart rendering
+- **React-pdf** — PDF text selection integrated with Chart prompting
 - **Dagre** — clean, automatic node layout
 - **OpenAI API** — LLM-based structure generation
-- **Tailwind CSS** — styling
+- **Tailwind CSS**, **Framer Motion** — styling
 
 ---
 
@@ -31,8 +32,10 @@ Students highlight legal concepts, rules, or case descriptions, and prompt a lar
 This repo currently contains the scaffolded code structure:
 
 - `src/app/` — app routes and backend API (`/api/generate`)
-- `src/components/` — UI components (input form, chart canvas)
+- `src/components/` — UI components (input form, chart canvas, PDF reader)
+- `src/app/pdf-viewer/[id]/` — Dynamic routes for PDF readers
 - `src/lib/` — layout utility using Dagre
+- `public/test-pdfs/` — Test PDFs stored here
 - Basic README, .gitignore, and Tailwind setup
 
 ---
@@ -40,6 +43,9 @@ This repo currently contains the scaffolded code structure:
 ## Submission Timeline
 
 - Scaffold: Sep 4, 2025
+- Custom Right-click Menu: Sep 7, 2025
+- PromptModal for user prompts: Sep 7, 2025
+- PDF viewer integration with context menu: Sep 8, 2025
 - API integration: In Progress
 - UI flowchart: In Progress
 - Deployment to Vercel: Coming soon!
