@@ -1,11 +1,19 @@
-"use client"
+"use client";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import RightClickMenu from "@/components/RightClickMenu";
+import RightClickMenu, {
+  RightClickMenuProps,
+} from "@/components/RightClickMenu";
 
 export default function Home() {
-
   const [selected, setSelected] = useState("");
+  const [menuVisible, setMenuVisibility] = useState(false);
+  const [menuProps, setMenuProps] = useState<RightClickMenuProps>({
+    x: 0,
+    y: 0,
+    selectedText: "",
+    onChart: () => {},
+  });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -20,17 +28,21 @@ export default function Home() {
       document.addEventListener("mouseup", handleMouseRelease);
 
       const handleChart = () => {
-        console.log("Chart selected.")
-      }
+        console.log("Chart selected.");
+      };
 
       const handleContextMenu = (event: MouseEvent) => {
         const mouseX = event.clientX;
-        const mouseY = event.clientY; 
+        const mouseY = event.clientY;
         console.log(`Mouse X: ${mouseX}, Mouse Y: ${mouseY}`);
-        return (
-          <RightClickMenu x={mouseX} y={mouseY} selectedText={selected} onChart={handleChart} />
-    )
-      }
+        setMenuVisibility(true);
+        setMenuProps((prev) => ({
+          ...prev,
+          x: mouseX,
+          y: mouseY,
+          selectedText: selected,
+        }));
+      };
 
       document.addEventListener("contextmenu", handleContextMenu);
 
@@ -45,6 +57,7 @@ export default function Home() {
     <div className="bg-zinc-800 text-white p-4 rounded shadow-md">
       <p>Right click menu.</p>
       {selected && <p className="mt-2 text-sm">Selected: "{selected}"</p>}
+      {menuVisible && <RightClickMenu {...menuProps} />}
     </div>
   );
 }
