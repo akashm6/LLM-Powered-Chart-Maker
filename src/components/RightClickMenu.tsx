@@ -1,34 +1,32 @@
 // Custom right click menu after selecting some text
 "use client";
 
-import { useEffect, useState } from "react";
+interface RightClickMenuProps {
+  x: number;
+  y: number;
+  selectedText: string;
+  onChart: () => void;
+}
 
-export default function RightClickMenu() {
-  const [selected, setSelected] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const handleMouseRelease = () => {
-        const currSelection = window.getSelection()?.toString().trim();
-        if (currSelection) {
-          setSelected(currSelection);
-          console.log("Selected text:", currSelection);
-        }
-      };
-
-      document.addEventListener("mouseup", handleMouseRelease);
-
-      return () => {
-        document.removeEventListener("mouseup", handleMouseRelease);
-      };
-    }
-  }, []);
-
+export default function RightClickMenu({ x, y, selectedText, onChart }: RightClickMenuProps) {
   return (
-    <div className="bg-zinc-800 text-white p-4 rounded shadow-md">
-      <p>Right click menu.</p>
-      {selected && <p className="mt-2 text-sm">Selected: "{selected}"</p>}
+    <div
+      className="absolute z-50 bg-zinc-800 text-white rounded shadow-md border border-zinc-600 w-48"
+      style={{ top: y, left: x }}
+    >
+      <p className="px-3 py-2 border-b border-zinc-700 text-xs text-zinc-400">
+        Selected: "{selectedText.slice(0, 30)}"
+      </p>
+      <button
+        className="w-full text-left px-4 py-2 hover:bg-zinc-700"
+        onClick={onChart}
+      >
+        Chart
+      </button>
+      <button className="w-full text-left px-4 py-2 hover:bg-zinc-700">Copy</button>
+      <button className="w-full text-left px-4 py-2 hover:bg-zinc-700">Edit</button>
     </div>
   );
 }
+
 
