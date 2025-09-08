@@ -1,7 +1,7 @@
 // Custom right click menu after selecting some text
 "use client";
 
-interface RightClickMenuProps {
+export interface RightClickMenuProps {
   x: number;
   y: number;
   selectedText: string;
