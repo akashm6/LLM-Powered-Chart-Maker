@@ -1,9 +1,11 @@
 "use client";
-import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import RightClickMenu, {
   RightClickMenuProps,
 } from "@/components/RightClickMenu";
+import PromptModal from "@/components/PromptModal";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [selected, setSelected] = useState("");
@@ -15,7 +17,15 @@ export default function Home() {
     onChart: () => {},
   });
 
+  const [open, setOpen] = useState(false);
+
+  const router = useRouter();
+
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   // for tracking selection text
   useEffect(() => {
@@ -35,6 +45,7 @@ export default function Home() {
   useEffect(() => {
     const handleChart = () => {
       console.log("Chart selected.");
+      setOpen(true);
     };
 
     const handleContextMenu = (event: MouseEvent) => {
@@ -61,10 +72,7 @@ export default function Home() {
     if (!menuVisible) return;
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuVisibility(false);
       }
     };
@@ -76,8 +84,19 @@ export default function Home() {
   return (
     <div className="bg-zinc-800 text-white p-4 rounded shadow-md min-h-screen">
       <p>Right click menu.</p>
+      <Button onClick={() => router.push("/pdf-viewer/1")}>Test PDF 1</Button>
+      <Button onClick={() => router.push("/pdf-viewer/2")}>Test PDF 2</Button>
+      <Button onClick={() => router.push("/pdf-viewer/3")}>Test PDF 3</Button>
       {selected && <p className="mt-2 text-sm">Selected: "{selected}"</p>}
       {menuVisible && <RightClickMenu ref={menuRef} {...menuProps} />}
+      {open && (
+        <PromptModal
+          open={true}
+          selectedText={selected}
+          onSubmit={() => {}}
+          onClose={handleClose}
+        />
+      )}
     </div>
   );
 }
