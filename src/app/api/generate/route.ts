@@ -63,7 +63,7 @@ Produce a concise flowchart JSON.
     if (!apiKey) {
       return NextResponse.json({ error: "Missing API key." }, { status: 500 });
     }
-    // Replace with the model you intend to use; JSON mode or response_format is great if available.
+
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -91,13 +91,13 @@ Produce a concise flowchart JSON.
 
     const rawOutput = data.choices?.[0]?.message?.content;
     if (!rawOutput)
-      return NextResponse.json({ error: "No content" }, { status: 502 });
+      return NextResponse.json({ error: "Generated chart is empty. Try selecting more text!" }, { status: 502 });
 
     // ensure that LLM response produces valid schema JSON
     const parsed = GraphSchema.safeParse(JSON.parse(rawOutput));
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Bad graph JSON", issues: parsed.error.format() },
+        { error: "Bad graph JSON. Try again.", issues: parsed.error.format() },
         { status: 422 }
       );
     }
@@ -105,7 +105,7 @@ Produce a concise flowchart JSON.
     return NextResponse.json(parsed.data, { status: 200 });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err?.message ?? "Server error" },
+      { error: err?.message ?? "Server error. Try again." },
       { status: 500 }
     );
   }
