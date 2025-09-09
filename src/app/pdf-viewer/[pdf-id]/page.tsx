@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import RightClickMenu from "@/components/RightClickMenu";
 import PromptModal from "@/components/PromptModal";
+import ChartCanvas from "@/components/ChartCanvas";
+import { GraphData } from "../../api/types/graph";
 
 // render the PDF reader on the client
 // avoids SSR pulling Node-only code and worker issues
@@ -20,51 +22,35 @@ export default function ViewerPage() {
   const fileUrl = `/test-pdfs/${docId}.pdf`;
 
   const [selectedText, setSelectedText] = useState("");
-  const [menuVisible, setMenuVisible] = useState(false);
-  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
-  const [promptOpen, setPromptOpen] = useState(false);
+  const [graph, setGraph] = useState<GraphData | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // custom context menu works on PDF viewers
-  const handleContextMenu = (e: React.MouseEvent) => {
-    if (!selectedText) return;
-    e.preventDefault();
-    setMenuPos({ x: e.clientX, y: e.clientY });
-    setMenuVisible(true);
-  };
+  const handleSubmitPrompt = async ({ prompt }: { prompt: string }) => {
+    const promptPayload = { selectedText, prompt }
+    try {
+      setLoading(true);
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(promptPayload),
+      });
 
-  const handleChart = () => {
-    setMenuVisible(false);
-    setPromptOpen(true);
+      const raw = await res.text(); 
+
+      // check for invalid JSON output
+      const data = JSON.parse(raw);
+      if (!res.ok) {
+        throw new Error(data?.error ?? `HTTP ${res.status}`);
+      }
+
+      setLoading(false);
+      setGraph(data);
+    } catch (err: any) {
+      console.error("Error submitting prompt. Try again.", err?.message || err);
+    }
   };
 
   return (
-    <div className="relative min-h-screen bg-zinc-900 text-white p-4">
-      <h1 className="text-xl font-semibold mb-4">PDF Viewer</h1>
-
-      <PdfReader
-        fileUrl={fileUrl}
-        onTextSelected={setSelectedText}
-        onContextMenu={handleContextMenu}
-      />
-
-      {menuVisible && (
-        <RightClickMenu
-          x={menuPos.x}
-          y={menuPos.y}
-          selectedText={selectedText}
-          onChart={handleChart}
-        />
-      )}
-
-      <PromptModal
-        open={promptOpen}
-        selectedText={selectedText}
-        onSubmit={({ prompt }) => {
-          console.log("Data sent to backend: ", { selectedText, prompt });
-          setPromptOpen(false);
-        }}
-        onClose={() => setPromptOpen(false)}
-      />
-    </div>
-  );
+    <div>ChartCanvas</div>
+  )
 }
