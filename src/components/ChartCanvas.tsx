@@ -70,9 +70,34 @@ function layoutWithDagre(graph: GraphData, direction: "TB" | "LR" = "TB") {
   return { chartNodes, chartEdges };
 }
 
-export default function ChartCanvas() {
+// specify charts as top-bottom for now
+export default function ChartCanvas({
+  graph,
+  direction = "TB",
+}: {
+  graph: GraphData;
+  direction?: "TB" | "LR";
+}) {
+  const { chartNodes, chartEdges } = useMemo(
+    () => layoutWithDagre(graph, direction),
+    [graph, direction]
+  );
+  const [nodes, , onNodesChange] = useNodesState(chartNodes);
+  const [edges, , onEdgesChange] = useEdgesState(chartEdges);
 
-    return (
-        <div>ChartCanvas</div>
-    )
+  return (
+    <div className="w-full h-full border border-zinc-700 rounded-lg overflow-hidden bg-white">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        fitView
+      >
+        <Background />
+        <MiniMap />
+        <Controls />
+      </ReactFlow>
+    </div>
+  );
 }
