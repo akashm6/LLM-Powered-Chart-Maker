@@ -21,14 +21,15 @@ export async function POST(req: NextRequest) {
   try {
     const { selectedText, prompt } = await req.json();
 
-    if (typeof selectedText !== "string" || selectedText.length < 5) {
+    if (typeof selectedText !== "string" || selectedText.length < 10) {
       return NextResponse.json(
-        { error: "selectedText too short" },
+        { error: "Selected text is too short." },
         { status: 400 }
       );
     }
 
-    const clipped = selectedText.slice(0, 4000);
+    // truncate selected text + user prompt at some threshold
+    const clipped = selectedText.slice(0, 6000);
     const userPrompt = (prompt ?? "").toString().slice(0, 1000);
 
     const system = `
@@ -57,10 +58,37 @@ Optional user prompt:
 
 Produce a concise flowchart JSON.
 `;
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message ?? "Server error" },
-      { status: 500 }
-    );
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "Missing API key." }, { status: 500 });
+    }
+    // Replace with the model you intend to use; JSON mode or response_format is great if available.
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content },
+        ],
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: data?.error ?? "LLM error" },
+        { status: res.status }
+      );
+    }
+  } catch (err) {
+    console.error(err);
   }
 }
