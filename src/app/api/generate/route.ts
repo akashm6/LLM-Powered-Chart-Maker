@@ -84,11 +84,29 @@ Produce a concise flowchart JSON.
     const data = await res.json();
     if (!res.ok) {
       return NextResponse.json(
-        { error: data?.error ?? "LLM error" },
+        { error: data?.error ?? "Something went wrong. Please try again." },
         { status: res.status }
       );
     }
-  } catch (err) {
-    console.error(err);
+
+    const rawOutput = data.choices?.[0]?.message?.content;
+    if (!rawOutput)
+      return NextResponse.json({ error: "No content" }, { status: 502 });
+
+    // ensure that LLM response produces valid schema JSON
+    const parsed = GraphSchema.safeParse(JSON.parse(rawOutput));
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Bad graph JSON", issues: parsed.error.format() },
+        { status: 422 }
+      );
+    }
+
+    return NextResponse.json(parsed.data, { status: 200 });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err?.message ?? "Server error" },
+      { status: 500 }
+    );
   }
 }
