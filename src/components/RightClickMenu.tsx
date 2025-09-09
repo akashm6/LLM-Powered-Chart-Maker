@@ -15,7 +15,7 @@ const RightClickMenu = forwardRef<HTMLDivElement, RightClickMenuProps>(
     return (
       <div
         ref={ref}
-        className="absolute z-50 bg-zinc-800 text-white rounded shadow-md border border-zinc-600 w-48"
+        className="fixed z-50 bg-zinc-800 text-white rounded shadow-md border border-zinc-600 w-48"
         style={{ top: y, left: x }}
       >
         <p className="px-3 py-2 border-b border-zinc-700 text-xs text-zinc-400">
