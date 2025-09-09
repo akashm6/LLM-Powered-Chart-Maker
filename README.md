@@ -31,8 +31,8 @@ Students highlight legal concepts, rules, or case descriptions, and prompt a lar
 
 This repo currently contains the scaffolded code structure:
 
-- `src/app/` — app routes and backend API (`/api/generate`)
-- `src/components/` — UI components (input form, chart canvas, PDF reader)
+- `src/app/` — app routes, backend API, and data models (`/api/generate`, `/api/types`)
+- `src/components/` — UI components (input form, chart canvas, PDF reader, prompt modal)
 - `src/app/pdf-viewer/[id]/` — Dynamic routes for PDF readers
 - `src/lib/` — layout utility using Dagre
 - `public/test-pdfs/` — Test PDFs stored here
@@ -46,7 +46,7 @@ This repo currently contains the scaffolded code structure:
 - Custom Right-click Menu: Sep 7, 2025
 - PromptModal for user prompts: Sep 7, 2025
 - PDF viewer integration with context menu: Sep 8, 2025
-- API integration: In Progress
+- API integration: Sep 9, 2025
 - UI flowchart: In Progress
 - Deployment to Vercel: Coming soon!
 
