@@ -32,6 +32,47 @@ function layoutWithDagre(graph: GraphData, direction: "TB" | "LR" = "TB") {
 
   dagre.layout(g);
 
-  return
+  const chartNodes: Node[] = graph.nodes.map((n) => {
+    const { x, y } = g.node(n.id);
+    return {
+      id: n.id,
+      position: { x, y },
+      data: { label: n.label },
+      sourcePosition: direction === "LR" ? Position.Right : Position.Bottom,
+      targetPosition: direction === "LR" ? Position.Left : Position.Top,
+      type: "default",
+      style: {
+        borderRadius: 12,
+        padding: 8,
+        border: "1px solid #D4D4D8",
+        background: "#fff",
+        width: nodeWidth,
+        height: nodeHeight,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+      },
+    };
+  });
+
+  const chartEdges: Edge[] = graph.edges.map((e, i) => ({
+    id: `${e.source}-${e.target}-${i}`,
+    source: e.source,
+    target: e.target,
+    label: e.label,
+    markerEnd: { type: MarkerType.ArrowClosed },
+    style: { strokeWidth: 1.5 },
+    labelBgPadding: [4, 2],
+    labelBgBorderRadius: 6,
+  }));
+
+  return { chartNodes, chartEdges };
 }
 
+export default function ChartCanvas() {
+
+    return (
+        <div>ChartCanvas</div>
+    )
+}
