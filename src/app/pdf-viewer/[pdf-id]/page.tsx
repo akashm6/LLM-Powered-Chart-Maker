@@ -15,7 +15,6 @@ import {
   DialogHeader,
 } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
-import { motion } from "framer-motion";
 
 // render the PDF reader on the client
 const PdfReader = dynamic(() => import("@/components/PdfReader"), {
