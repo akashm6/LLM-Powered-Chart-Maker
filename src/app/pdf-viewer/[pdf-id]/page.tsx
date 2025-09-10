@@ -52,8 +52,9 @@ export default function ViewerPage() {
       if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
 
       setGraph(data);
-    } catch (e: any) {
-      setError(e?.message || "Error generating chart");
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Error generating chart";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -91,9 +92,9 @@ export default function ViewerPage() {
         <div className="hidden xl:block">
           <div className="sticky top-4 h-[78vh] p-5 rounded-xl bg-zinc-800/70 backdrop-blur border border-zinc-700 shadow-lg flex flex-col">
             {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <LoadingSpinner />
-            </div>
+              <div className="flex-1 flex items-center justify-center">
+                <LoadingSpinner />
+              </div>
             ) : error ? (
               <div className="p-4 bg-red-600 rounded text-white">{error}</div>
             ) : graph ? (
@@ -117,7 +118,7 @@ export default function ViewerPage() {
               <div className="flex-1 flex flex-col items-center justify-center text-center text-zinc-400 space-y-3">
                 <p className="text-sm">
                   Highlight text in the PDF,
-                  <br /> Right click, and click 
+                  <br /> Right click, and click
                   <span className="font-medium text-white"> “Chart”</span>
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -156,7 +157,7 @@ export default function ViewerPage() {
           y={menuPos.y}
           selectedText={selectedText}
           onChart={handleChart}
-          onClose={() => setMenuVisible(false)} 
+          onClose={() => setMenuVisible(false)}
         />
       )}
 
