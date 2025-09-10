@@ -8,7 +8,7 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
 const workerUrl =
-  "https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js";
+  "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
 
 // onContextMenu -> custom function so we can use our right click menu on the PDF itself
 interface PdfReaderProps {
