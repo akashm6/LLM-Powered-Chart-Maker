@@ -8,9 +8,13 @@ export default function LoadingSpinner() {
         animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
       />
-      <p className="text-zinc-400 text-sm tracking-wide">
+      <motion.p
+        className="text-zinc-300 text-lg font-medium"
+        animate={{ opacity: [0.4, 1, 0.4] }}
+        transition={{ repeat: Infinity, duration: 1.5 }}
+      >
         Generating your flowchart…
-      </p>
+      </motion.p>
     </div>
   );
 }
