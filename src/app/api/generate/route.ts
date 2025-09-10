@@ -3,10 +3,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+// --- SCHEMA DEFINITIONS ---
 const NodeSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
+  type: z.enum(["start", "decision", "process", "end"]),
+  summary: z.string().optional(), // <-- allow summary (optional at first)
 });
+
 const EdgeSchema = z.object({
   source: z.string().min(1),
   target: z.string().min(1),
@@ -28,12 +32,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // truncate selected text + user prompt at some threshold
     const clipped = selectedText.slice(0, 6000);
     const userPrompt = (prompt ?? "").toString().slice(0, 1000);
 
-    const system = `
-You are a system that converts legal or instructional text into *detailed, hierarchical flowcharts* for law students.
+    // prompt 1 prioritizes multi dimensional flowcharts
+    const systemStructure = `
+You are a system that converts legal or instructional text into *detailed, hierarchical flowcharts*.
 
 Output ONLY valid JSON with this schema:
 {
@@ -46,18 +50,16 @@ Output ONLY valid JSON with this schema:
 }
 
 Rules:
-- Node labels: clear but concise (<= 12 words).
-- Always capture ALL major concepts, policies, and requirements from the text.
-- Group related ideas under parent nodes (e.g. "Evaluation" → "Midterm Exam" → "Weight 15%").
-- Use decisions when the text describes conditions, branching policies, or exceptions.
-- Use edges with descriptive labels when relationships need explanation (e.g. "leads to", "requires", "includes").
-- Always include a "Start" and "End" node, but between them show as much structure as possible.
-- Do NOT skip or oversimplify. Err on the side of including too much detail rather than too little.
-- Maintain a clear hierarchy: general → specific → subpoints.
+- PRIORITY: produce a detailed, multidimensional flowchart (rich branching, hierarchy, descriptive edges).
+- Node labels: concise (<= 12 words).
+- Use decisions for conditions or exceptions.
+- Use descriptive edge labels (e.g. "leads to", "requires").
+- Always include Start and End.
+- Err on the side of too much detail.
 - Output ONLY valid JSON. No text outside the JSON.
 `;
 
-    const content = `
+    const contentStructure = `
 Selected text:
 """${clipped}"""
 
@@ -65,10 +67,9 @@ Optional user instruction:
 """${userPrompt}"""
 
 Task:
-- Break down the text into detailed nodes and edges.
-- Represent hierarchy (sections, sub-sections, details).
-- Include exam weights, deadlines, conditions, and policies explicitly.
-- Output a flowchart JSON ready for rendering.
+- Break the text into nodes and edges with detailed hierarchy.
+- Represent sections, subsections, and policies as a tree-like flow.
+- Output a detailed flowchart JSON.
 `;
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -85,8 +86,8 @@ Task:
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: system },
-          { role: "user", content },
+          { role: "system", content: systemStructure },
+          { role: "user", content: contentStructure },
         ],
         temperature: 0.2,
         response_format: { type: "json_object" },
@@ -96,31 +97,78 @@ Task:
     const data = await res.json();
     if (!res.ok) {
       return NextResponse.json(
-        { error: data?.error ?? "Something went wrong. Please try again." },
+        { error: data?.error ?? "Something went wrong." },
         { status: res.status }
       );
     }
 
     const rawOutput = data.choices?.[0]?.message?.content;
-    if (!rawOutput)
+    if (!rawOutput) {
       return NextResponse.json(
-        { error: "Generated chart is empty. Try selecting more text!" },
+        { error: "Generated chart is empty. Try selecting more text." },
         { status: 502 }
       );
+    }
 
-    // ensure that LLM response produces valid schema JSON
     const parsed = GraphSchema.safeParse(JSON.parse(rawOutput));
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Bad graph JSON. Try again.", issues: parsed.error.format() },
+        { error: "Bad graph JSON.", issues: parsed.error.format() },
         { status: 422 }
       );
     }
 
-    return NextResponse.json(parsed.data, { status: 200 });
+    let graph = parsed.data;
+
+    // prompt 2 prioritizes node summaries
+    const systemSummary = `
+You are a system that summarizes nodes in flowcharts.
+
+Given the original source text and a node label, write 1–2 sentences
+summarizing the meaning of this node in context.
+Output ONLY the summary string.`;
+
+    for (const node of graph.nodes) {
+      const summaryRes = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemSummary },
+              {
+                role: "user",
+                content: `
+Source text:
+"""${clipped}"""
+
+Node label: "${node.label}"
+
+Task: Summarize this node in 1–2 sentences.
+`,
+              },
+            ],
+            temperature: 0.3,
+          }),
+        }
+      );
+
+      const summaryData = await summaryRes.json();
+      node["summary"] =
+        summaryData.choices?.[0]?.message?.content?.trim() ??
+        "Summary unavailable.";
+    }
+
+    // return final enriched graph
+    return NextResponse.json(graph, { status: 200 });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err?.message ?? "Server error. Try again." },
+      { error: err?.message ?? "Server error." },
       { status: 500 }
     );
   }
