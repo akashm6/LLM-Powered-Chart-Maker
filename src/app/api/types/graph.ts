@@ -2,17 +2,20 @@
 // Creates standardized format for LLM output
 
 export type GraphNode = {
-    id: string;
-    label: string;
-}
+  id: string;
+  label: string;
+  type: "start" | "decision" | "process" | "end";
+  summary?: string; 
+};
 
 export type GraphEdge = {
-    source: string;
-    target: string;
-    label?: string;
-}
+  source: string;
+  target: string;
+  label?: string;
+};
 
 export type GraphData = {
-    nodes: GraphNode[];
-    edges: GraphEdge[];
-}
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+};
+
