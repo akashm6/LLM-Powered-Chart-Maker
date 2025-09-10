@@ -8,8 +8,6 @@ import ReactFlow, {
   MiniMap,
   Node,
   Edge,
-  useNodesState,
-  useEdgesState,
   Position,
   MarkerType,
 } from "reactflow";
@@ -82,16 +80,12 @@ export default function ChartCanvas({
     () => layoutWithDagre(graph, direction),
     [graph, direction]
   );
-  const [nodes, , onNodesChange] = useNodesState(chartNodes);
-  const [edges, , onEdgesChange] = useEdgesState(chartEdges);
-
   return (
     <div className="w-full h-full border border-zinc-700 rounded-lg overflow-hidden bg-white">
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        key={graph.nodes.map((n) => n.id).join("-")}
+        nodes={chartNodes}
+        edges={chartEdges}
         fitView
       >
         <Background />
