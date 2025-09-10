@@ -174,10 +174,8 @@ Task: Summarize this node in 1–2 sentences.
 
     // return final enriched graph
     return NextResponse.json(graph, { status: 200 });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message ?? "Server error." },
-      { status: 500 }
-    );
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Server error.";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
