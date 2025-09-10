@@ -1,4 +1,3 @@
-// Dynamically routed page for any test PDF
 "use client";
 
 import { useParams } from "next/navigation";
@@ -15,16 +14,15 @@ import {
   DialogHeader,
 } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
+import { motion } from "framer-motion";
 
 // render the PDF reader on the client
-// avoids SSR pulling Node-only code and worker issues
 const PdfReader = dynamic(() => import("@/components/PdfReader"), {
   ssr: false,
 });
 
 export default function ViewerPage() {
   const params = useParams();
-  // dynamically grab PDF url
   const docId = params?.["pdf-id"] as string;
   const fileUrl = `/test-pdfs/${docId}.pdf`;
 
@@ -39,7 +37,6 @@ export default function ViewerPage() {
 
   const handleSubmitPrompt = async ({ prompt }: { prompt: string }) => {
     const promptPayload = { selectedText, prompt };
-    // reset chart on new chart creation
     setGraph(null);
     try {
       setLoading(true);
@@ -50,25 +47,18 @@ export default function ViewerPage() {
       });
 
       const rawOutput = await res.text();
-
-      // check for invalid JSON output
       const data = JSON.parse(rawOutput);
 
-      if (!res.ok) {
-        throw new Error(data?.error ?? `HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
 
-      setLoading(false);
       setGraph(data);
     } catch (e: any) {
-      console.error(
-        "There was an error submitting your prompt. Try again: ",
-        e?.message || e
-      );
+      setError(e?.message || "Error generating chart");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // custom context menu works on PDF viewers
   const handleContextMenu = (e: React.MouseEvent) => {
     if (!selectedText) return;
     e.preventDefault();
@@ -82,21 +72,33 @@ export default function ViewerPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-zinc-900 text-white p-4">
-      <h1 className="text-xl font-semibold mb-4">PDF Viewer</h1>
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_520px] gap-4">
-        <div>
+    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white">
+      <header className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center sticky top-0 z-20 backdrop-blur bg-zinc-900/50">
+        <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          PDF → Flowchart
+        </h1>
+      </header>
+
+      <main className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-6 p-6">
+        <div className="rounded-xl bg-zinc-800/60 backdrop-blur border border-zinc-700 p-4 overflow-y-auto">
           <PdfReader
             fileUrl={fileUrl}
             onTextSelected={setSelectedText}
             onContextMenu={handleContextMenu}
           />
         </div>
-        <div className="xl:block hidden">
-          <div className="sticky top-4 h-[80vh] p-4 rounded-xl bg-zinc-800/60 backdrop-blur border border-zinc-700">
+
+        <div className="hidden xl:block">
+          <div className="sticky top-4 h-[78vh] p-5 rounded-xl bg-zinc-800/70 backdrop-blur border border-zinc-700 shadow-lg flex flex-col">
             {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <p className="animate-pulse text-zinc-300">Generating chart…</p>
+              <div className="flex-1 flex items-center justify-center">
+                <motion.p
+                  className="text-zinc-300 text-lg font-medium"
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  Generating chart…
+                </motion.p>
               </div>
             ) : error ? (
               <div className="p-4 bg-red-600 rounded text-white">{error}</div>
@@ -104,30 +106,53 @@ export default function ViewerPage() {
               <>
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-lg font-semibold">Generated Chart</h2>
-                  <Button size="sm" onClick={() => setFullscreen(true)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="cursor-pointer"
+                    onClick={() => setFullscreen(true)}
+                  >
                     Maximize
                   </Button>
                 </div>
-                <div className="h-[calc(80vh-3rem)]">
+                <div className="flex-1 rounded-lg overflow-hidden border border-zinc-700">
                   <ChartCanvas graph={graph} />
                 </div>
               </>
             ) : (
-              <div className="text-zinc-400 text-sm">
-                Highlight text in the PDF, Right click, and click “Chart".
+              <div className="flex-1 flex flex-col items-center justify-center text-center text-zinc-400 space-y-3">
+                <p className="text-sm">
+                  Highlight text in the PDF
+                  <br /> Right click,
+                  <span className="font-medium text-white"> “Chart”</span>
+                </p>
+                <p className="text-xs text-zinc-500">
+                  Your generated flowchart will appear here.
+                </p>
               </div>
             )}
           </div>
         </div>
-      </div>
+      </main>
 
-      <Button onClick={() => setFullscreen(true)}>Maximize</Button>
       <Dialog open={fullscreen} onOpenChange={setFullscreen}>
-        <DialogHeader>
-          <DialogTitle>Maximized View</DialogTitle>
-        </DialogHeader>
-        <DialogContent className="w-screen h-screen">
-          {graph && <ChartCanvas graph={graph} />}
+        <DialogContent
+          className="
+      sm:max-w-[92vw] max-w-[92vw]
+      w-[92vw] h-[88vh]
+      bg-zinc-900/95 border border-zinc-700 rounded-xl
+      p-4 flex flex-col
+    "
+        >
+          <DialogHeader className="p-0 pb-3">
+            <DialogTitle className="text-white text-lg">
+              Maximized Chart View
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 min-h-0 w-full rounded-lg overflow-hidden border border-zinc-700">
+            {graph && <ChartCanvas key="maximized" graph={graph} />}
+          </div>
         </DialogContent>
       </Dialog>
 
