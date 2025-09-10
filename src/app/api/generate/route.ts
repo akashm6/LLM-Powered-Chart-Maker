@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const userPrompt = (prompt ?? "").toString().slice(0, 1000);
 
     // prompt 1 prioritizes multi dimensional flowcharts
-    const systemStructure = `
+const systemStructure = `
 You are a system that converts legal or instructional text into *detailed, hierarchical flowcharts*.
 
 Output ONLY valid JSON with this schema:
@@ -50,17 +50,20 @@ Output ONLY valid JSON with this schema:
   ]
 }
 
-Rules:
-- PRIORITY: produce a detailed, multidimensional flowchart (rich branching, hierarchy, descriptive edges).
-- Node labels: concise (<= 12 words).
-- Use decisions for conditions or exceptions.
-- Use descriptive edge labels (e.g. "leads to", "requires").
-- Always include Start and End.
-- Err on the side of too much detail.
+Strict Rules:
+- PRIORITY: Flowcharts must be *multidimensional*, with tree-like branching and hierarchy.
+- NEVER produce a single straight line of nodes. At least 2 branches and sub-sections are required if any hierarchy exists.
+- Group related ideas under parent nodes (e.g. "Evaluation" → "Midterm Exam" → "Weight 15%").
+- Use decision nodes for conditions, policies, or exceptions, with edges labeled "yes"/"no" where relevant.
+- All edges should have descriptive labels (e.g. "leads to", "requires", "includes"), except trivial sequential links.
+- Node labels: clear and concise (<= 12 words).
+- Always include Start and End nodes.
+- Err on the side of *too much detail*, never too little.
 - Output ONLY valid JSON. No text outside the JSON.
+- Do not skip relationships — every section, requirement, or exception must be connected by edges.
 `;
 
-    const contentStructure = `
+const contentStructure = `
 Selected text:
 """${clipped}"""
 
@@ -68,9 +71,10 @@ Optional user instruction:
 """${userPrompt}"""
 
 Task:
-- Break the text into nodes and edges with detailed hierarchy.
-- Represent sections, subsections, and policies as a tree-like flow.
-- Output a detailed flowchart JSON.
+- Break the text into nodes and edges with a branching, tree-like hierarchy.
+- Explicitly represent sections, subsections, requirements, exceptions, and relationships.
+- Ensure at least 2+ branches are visible where structure allows.
+- Output a detailed flowchart JSON ready for rendering.
 `;
 
     const apiKey = process.env.OPENAI_API_KEY;
