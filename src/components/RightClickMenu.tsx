@@ -39,7 +39,7 @@ const RightClickMenu = forwardRef<HTMLDivElement, RightClickMenuProps>(
         ref={(el) => {
           menuRef.current = el;
           if (typeof ref === "function") ref(el);
-          else if (ref) (ref as any).current = el;
+          else if (ref) (ref as React.RefObject<HTMLDivElement | null>).current = el;
         }}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -90,5 +90,7 @@ const RightClickMenu = forwardRef<HTMLDivElement, RightClickMenuProps>(
     );
   }
 );
+
+RightClickMenu.displayName = "RightClickMenu";
 
 export default RightClickMenu;
