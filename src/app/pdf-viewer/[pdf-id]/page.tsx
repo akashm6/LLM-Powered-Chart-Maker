@@ -122,8 +122,8 @@ export default function ViewerPage() {
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center text-zinc-400 space-y-3">
                 <p className="text-sm">
-                  Highlight text in the PDF
-                  <br /> Right click,
+                  Highlight text in the PDF,
+                  <br /> Right click, and click 
                   <span className="font-medium text-white"> “Chart”</span>
                 </p>
                 <p className="text-xs text-zinc-500">
@@ -162,6 +162,7 @@ export default function ViewerPage() {
           y={menuPos.y}
           selectedText={selectedText}
           onChart={handleChart}
+          onClose={() => setMenuVisible(false)} 
         />
       )}
 
