@@ -30,29 +30,30 @@ function layoutWithDagre(graph: GraphData, direction: "TB" | "LR" = "TB") {
 
   dagre.layout(g);
 
-  const chartNodes: Node[] = graph.nodes.map((n) => {
-    const { x, y } = g.node(n.id);
-    return {
-      id: n.id,
-      position: { x, y },
-      data: { label: n.label },
-      sourcePosition: direction === "LR" ? Position.Right : Position.Bottom,
-      targetPosition: direction === "LR" ? Position.Left : Position.Top,
-      type: "default",
-      style: {
-        borderRadius: 12,
-        padding: 8,
-        border: "1px solid #D4D4D8",
-        background: "#fff",
-        width: nodeWidth,
-        height: nodeHeight,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-      },
-    };
-  });
+  
+const chartNodes: Node[] = graph.nodes.map((n) => {
+  const { x, y } = g.node(n.id);
+  return {
+    id: n.id,
+    position: { x, y },
+    data: { label: n.label, summary: n.summary }, 
+    sourcePosition: direction === "LR" ? Position.Right : Position.Bottom,
+    targetPosition: direction === "LR" ? Position.Left : Position.Top,
+    type: "default",
+    style: {
+      borderRadius: 12,
+      padding: 8,
+      border: "1px solid #D4D4D8",
+      background: "#fff",
+      width: nodeWidth,
+      height: nodeHeight,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+    },
+  };
+});
 
   const chartEdges: Edge[] = graph.edges.map((e, i) => ({
     id: `${e.source}-${e.target}-${i}`,
@@ -80,6 +81,10 @@ export default function ChartCanvas({
     () => layoutWithDagre(graph, direction),
     [graph, direction]
   );
+
+  const onNodeClick = (_: any, node: Node) => {
+  alert(node.data.summary); 
+};
   return (
     <div className="w-full h-full border border-zinc-700 rounded-lg overflow-hidden bg-white">
       <ReactFlow
@@ -87,6 +92,7 @@ export default function ChartCanvas({
         nodes={chartNodes}
         edges={chartEdges}
         fitView
+        onNodeClick={onNodeClick}
       >
         <Background />
         <MiniMap pannable zoomable/>
