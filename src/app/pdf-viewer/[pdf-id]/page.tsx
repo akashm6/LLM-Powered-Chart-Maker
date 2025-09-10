@@ -7,6 +7,7 @@ import RightClickMenu from "@/components/RightClickMenu";
 import PromptModal from "@/components/PromptModal";
 import ChartCanvas from "@/components/ChartCanvas";
 import { GraphData } from "../../api/types/graph";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   Dialog,
   DialogContent,
@@ -91,15 +92,9 @@ export default function ViewerPage() {
         <div className="hidden xl:block">
           <div className="sticky top-4 h-[78vh] p-5 rounded-xl bg-zinc-800/70 backdrop-blur border border-zinc-700 shadow-lg flex flex-col">
             {loading ? (
-              <div className="flex-1 flex items-center justify-center">
-                <motion.p
-                  className="text-zinc-300 text-lg font-medium"
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                >
-                  Generating chart…
-                </motion.p>
-              </div>
+            <div className="flex-1 flex items-center justify-center">
+              <LoadingSpinner />
+            </div>
             ) : error ? (
               <div className="p-4 bg-red-600 rounded text-white">{error}</div>
             ) : graph ? (
