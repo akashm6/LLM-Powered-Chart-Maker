@@ -62,7 +62,14 @@ export default function PromptModal(props: PromptModalProps) {
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={() => onSubmit({selectedText: selectedText, prompt: prompt})}>Submit</Button>
+            <Button
+              onClick={() => {
+                handleSubmit();
+                onClose();
+              }}
+            >
+              Submit
+            </Button>
           </DialogFooter>
         </motion.div>
       </DialogContent>
