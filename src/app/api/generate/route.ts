@@ -33,30 +33,42 @@ export async function POST(req: NextRequest) {
     const userPrompt = (prompt ?? "").toString().slice(0, 1000);
 
     const system = `
-You are a system that converts legal or instructional text into clean, helpful flowcharts.
-Output ONLY valid JSON following this schema:
+You are a system that converts legal or instructional text into *detailed, hierarchical flowcharts* for law students.
+
+Output ONLY valid JSON with this schema:
 {
-  "nodes": [{"id": "string", "label": "string", "type": "start|decision|process|end"}],
-  "edges": [{"source": "string", "target": "string", "label": "string (optional)"}]
+  "nodes": [
+    { "id": "string", "label": "string", "type": "start|decision|process|end" }
+  ],
+  "edges": [
+    { "source": "string", "target": "string", "label": "string (optional)" }
+  ]
 }
 
 Rules:
-- Node labels: short phrases (<= 8 words).
-- Always include "start" and "end".
-- Decisions branch with labeled edges ("yes", "no").
-- Remove redundancy and minor details.
-- Keep flow top-to-bottom, merging related steps.
-- Do not output anything except valid JSON.
+- Node labels: clear but concise (<= 12 words).
+- Always capture ALL major concepts, policies, and requirements from the text.
+- Group related ideas under parent nodes (e.g. "Evaluation" → "Midterm Exam" → "Weight 15%").
+- Use decisions when the text describes conditions, branching policies, or exceptions.
+- Use edges with descriptive labels when relationships need explanation (e.g. "leads to", "requires", "includes").
+- Always include a "Start" and "End" node, but between them show as much structure as possible.
+- Do NOT skip or oversimplify. Err on the side of including too much detail rather than too little.
+- Maintain a clear hierarchy: general → specific → subpoints.
+- Output ONLY valid JSON. No text outside the JSON.
 `;
 
     const content = `
 Selected text:
 """${clipped}"""
 
-Optional user prompt:
+Optional user instruction:
 """${userPrompt}"""
 
-Produce a concise flowchart JSON.
+Task:
+- Break down the text into detailed nodes and edges.
+- Represent hierarchy (sections, sub-sections, details).
+- Include exam weights, deadlines, conditions, and policies explicitly.
+- Output a flowchart JSON ready for rendering.
 `;
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -91,7 +103,10 @@ Produce a concise flowchart JSON.
 
     const rawOutput = data.choices?.[0]?.message?.content;
     if (!rawOutput)
-      return NextResponse.json({ error: "Generated chart is empty. Try selecting more text!" }, { status: 502 });
+      return NextResponse.json(
+        { error: "Generated chart is empty. Try selecting more text!" },
+        { status: 502 }
+      );
 
     // ensure that LLM response produces valid schema JSON
     const parsed = GraphSchema.safeParse(JSON.parse(rawOutput));
