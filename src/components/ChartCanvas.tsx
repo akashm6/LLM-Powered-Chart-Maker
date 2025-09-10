@@ -12,7 +12,7 @@ import ReactFlow, {
 } from "reactflow";
 import dagre from "@dagrejs/dagre";
 import "reactflow/dist/style.css";
-import { GraphData } from "../app/api/types/graph";
+import { GraphData, GraphNode } from "../app/api/types/graph";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,7 @@ function layoutWithDagre(graph: GraphData, direction: "TB" | "LR" = "TB") {
     return {
       id: n.id,
       position: { x, y },
-      data: { label: n.label, summary: (n as any).summary }, 
+      data: { label: n.label, summary: (n as GraphNode).summary }, 
       sourcePosition: direction === "LR" ? Position.Right : Position.Bottom,
       targetPosition: direction === "LR" ? Position.Left : Position.Top,
       type: "default",
