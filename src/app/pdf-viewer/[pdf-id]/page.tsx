@@ -8,7 +8,12 @@ import RightClickMenu from "@/components/RightClickMenu";
 import PromptModal from "@/components/PromptModal";
 import ChartCanvas from "@/components/ChartCanvas";
 import { GraphData } from "../../api/types/graph";
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from "../../../components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+} from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 
 // render the PDF reader on the client
@@ -88,22 +93,28 @@ export default function ViewerPage() {
           />
         </div>
         <div className="xl:block hidden">
-          <div className="sticky top-4 h-[80vh]">
+          <div className="sticky top-4 h-[80vh] p-4 rounded-xl bg-zinc-800/60 backdrop-blur border border-zinc-700">
             {loading ? (
-              <div className="p-4 bg-zinc-800 rounded">Generating chart...</div>
+              <div className="flex items-center justify-center h-full">
+                <p className="animate-pulse text-zinc-300">Generating chart…</p>
+              </div>
             ) : error ? (
               <div className="p-4 bg-red-600 rounded text-white">{error}</div>
             ) : graph ? (
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-medium">Chart</h2>
-                <Button size="sm" onClick={() => setFullscreen(true)}>
-                  Maximize
-                </Button>
-                <ChartCanvas graph={graph} />
-              </div>
+              <>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-semibold">Generated Chart</h2>
+                  <Button size="sm" onClick={() => setFullscreen(true)}>
+                    Maximize
+                  </Button>
+                </div>
+                <div className="h-[calc(80vh-3rem)]">
+                  <ChartCanvas graph={graph} />
+                </div>
+              </>
             ) : (
-              <div className="p-4 bg-zinc-800 rounded text-zinc-300">
-                Select text, Right-click, and generate AI-powered charts.
+              <div className="text-zinc-400 text-sm">
+                Highlight text in the PDF, Right click, and click “Chart".
               </div>
             )}
           </div>
@@ -113,8 +124,8 @@ export default function ViewerPage() {
       <Button onClick={() => setFullscreen(true)}>Maximize</Button>
       <Dialog open={fullscreen} onOpenChange={setFullscreen}>
         <DialogHeader>
-            <DialogTitle>Maximized View</DialogTitle>
-          </DialogHeader>
+          <DialogTitle>Maximized View</DialogTitle>
+        </DialogHeader>
         <DialogContent className="w-screen h-screen">
           {graph && <ChartCanvas graph={graph} />}
         </DialogContent>
