@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   try {
     const { selectedText, prompt } = await req.json();
 
-    if (typeof selectedText !== "string" || selectedText.length < 10) {
+    if (typeof selectedText !== "string" || selectedText.length < 50) {
       return NextResponse.json(
         { error: "Selected text is too short." },
         { status: 400 }
@@ -121,7 +121,7 @@ Task:
       );
     }
 
-    let graph = parsed.data;
+    const graph = parsed.data;
 
     // prompt 2 prioritizes high-quality node summaries
     const systemSummary = `
