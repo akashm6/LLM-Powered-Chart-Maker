@@ -30,7 +30,9 @@ export default function ViewerPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmitPrompt = async ({ prompt }: { prompt: string }) => {
-    const promptPayload = { selectedText, prompt }
+    const promptPayload = { selectedText, prompt };
+    // reset chart on new chart creation
+    setGraph(null);
     try {
       setLoading(true);
       const res = await fetch("/api/generate", {
@@ -39,8 +41,7 @@ export default function ViewerPage() {
         body: JSON.stringify(promptPayload),
       });
 
-
-      const rawOutput = await res.text(); 
+      const rawOutput = await res.text();
 
       // check for invalid JSON output
       const data = JSON.parse(rawOutput);
@@ -48,11 +49,14 @@ export default function ViewerPage() {
       if (!res.ok) {
         throw new Error(data?.error ?? `HTTP ${res.status}`);
       }
-      
+
       setLoading(false);
       setGraph(data);
     } catch (e: any) {
-      console.error("There was an error submitting your prompt. Try again: ", e?.message || e);
+      console.error(
+        "There was an error submitting your prompt. Try again: ",
+        e?.message || e
+      );
     }
   };
 
@@ -82,13 +86,11 @@ export default function ViewerPage() {
         </div>
         <div className="xl:block hidden">
           <div className="sticky top-4 h-[80vh]">
-            {loading && (
+            {loading ? (
               <div className="p-4 bg-zinc-800 rounded">Generating chart...</div>
-            )}
-            {error && (
+            ) : error ? (
               <div className="p-4 bg-red-600 rounded text-white">{error}</div>
-            )}
-            {graph ? (
+            ) : graph ? (
               <ChartCanvas graph={graph} />
             ) : (
               <div className="p-4 bg-zinc-800 rounded text-zinc-300">
@@ -117,5 +119,3 @@ export default function ViewerPage() {
     </div>
   );
 }
-
-
