@@ -89,8 +89,8 @@ export default function ChartCanvas({
         fitView
       >
         <Background />
-        <MiniMap />
-        <Controls />
+        <MiniMap pannable zoomable/>
+        <Controls showFitView showZoom/>
       </ReactFlow>
     </div>
   );
