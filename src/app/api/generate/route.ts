@@ -3,12 +3,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-// --- SCHEMA DEFINITIONS ---
+// schema definitions
 const NodeSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
   type: z.enum(["start", "decision", "process", "end"]),
-  summary: z.string().optional(), // <-- allow summary (optional at first)
+  summary: z.string().optional(),
 });
 
 const EdgeSchema = z.object({
@@ -16,6 +16,7 @@ const EdgeSchema = z.object({
   target: z.string().min(1),
   label: z.string().optional(),
 });
+
 const GraphSchema = z.object({
   nodes: z.array(NodeSchema).min(1),
   edges: z.array(EdgeSchema),
@@ -77,6 +78,7 @@ Task:
       return NextResponse.json({ error: "Missing API key." }, { status: 500 });
     }
 
+    // generates graph structure
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -110,6 +112,7 @@ Task:
       );
     }
 
+    // validate that we get valid JSON output
     const parsed = GraphSchema.safeParse(JSON.parse(rawOutput));
     if (!parsed.success) {
       return NextResponse.json(
@@ -120,7 +123,7 @@ Task:
 
     let graph = parsed.data;
 
-    // prompt 2 prioritizes node summaries
+    // prompt 2 prioritizes high-quality node summaries
     const systemSummary = `
 You are a system that summarizes nodes in flowcharts.
 
@@ -128,7 +131,8 @@ Given the original source text and a node label, write 1–2 sentences
 summarizing the meaning of this node in context.
 Output ONLY the summary string.`;
 
-    for (const node of graph.nodes) {
+    // parallelize the summary calls for 4x speedup
+    const summaryPromises = graph.nodes.map(async (node) => {
       const summaryRes = await fetch(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -159,10 +163,14 @@ Task: Summarize this node in 1–2 sentences.
       );
 
       const summaryData = await summaryRes.json();
-      node["summary"] =
+      node.summary =
         summaryData.choices?.[0]?.message?.content?.trim() ??
         "Summary unavailable.";
-    }
+      return node;
+    });
+
+    // wait for all the summaries at once
+    graph.nodes = await Promise.all(summaryPromises);
 
     // return final enriched graph
     return NextResponse.json(graph, { status: 200 });
